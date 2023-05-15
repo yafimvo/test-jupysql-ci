@@ -1,3 +1,5 @@
+import time
+from contextlib import contextmanager
 import shutil
 import pandas as pd
 import pytest
@@ -5,6 +7,7 @@ from sqlalchemy import MetaData, create_engine
 from sql import _testing
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
+from dockerctx import new_container
 
 
 # Skip the test case when live mode is on (with --live arg)
@@ -292,3 +295,91 @@ def ip_with_Snowflake(ip_empty, setup_Snowflake, pytestconfig):
     yield ip_empty
     # Disconnect database
     ip_empty.run_cell("%sql -x " + config["alias"])
+
+
+# questdb
+
+QUESTDB_CONNECTION_STRING = (
+    "dbname='qdb' user='admin' host='127.0.0.1' port='8812' password='quest'"
+)
+
+
+def custom_database_ready(
+    custom_connection,
+    timeout=20,
+    poll_freq=0.5,
+):
+    """Wait until the container is ready to receive connections.
+
+
+    :type host: str
+    :type port: int
+    :type timeout: float
+    :type poll_freq: float
+    """
+
+    errors = []
+
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        try:
+            custom_connection()
+            return True
+        except Exception as e:
+            errors.append(str(e))
+
+        time.sleep(poll_freq)
+
+    # print all the errors so we know what's goin on since failing to connect might be
+    # to some misconfiguration error
+    errors_ = "\n".join(errors)
+    print(f"ERRORS: {errors_}")
+
+    return False
+
+
+@contextmanager
+def questdb_container(is_bypass_init=False):
+    if is_bypass_init:
+        yield None
+        return
+
+    def test_questdb_connection():
+        import psycopg as pg
+
+        engine = pg.connect(QUESTDB_CONNECTION_STRING)
+        engine.close()
+
+    with new_container(
+        image_name="questdb/questdb",
+        ports={"8812": "8812", "9000": "9000", "9009": "9009"},
+        ready_test=lambda: custom_database_ready(test_questdb_connection),
+        healthcheck={
+            "interval": 10000000000,
+            "timeout": 5000000000,
+            "retries": 5,
+        },
+    ) as container:
+        yield container
+
+
+@pytest.fixture
+def ip_questdb(ip_empty):
+    """
+    Initalizes questdb database container and loads it with data
+    """
+    with questdb_container():
+        ip_empty.run_cell(
+            f"""
+        import psycopg2 as pg
+        engine = pg.connect(
+            "{QUESTDB_CONNECTION_STRING}"
+        )
+        %sql engine
+        """
+        )
+
+        # Load pre-defined datasets
+        # import_data(penguins_data, "penguins.csv")
+        # import_data(diamonds_data, "diamonds.csv")
+        yield ip_empty

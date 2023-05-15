@@ -107,6 +107,12 @@ def pytest_configure(config):
                 ip_empty.run_cell("%sql sqlite://")
                 yield ip_empty
 
+        elif ip == "questdb":
+
+            @pytest.fixture
+            def custom_ip(self, ip_questdb):  # noqa F811
+                yield ip_questdb
+
         else:
             pass
 

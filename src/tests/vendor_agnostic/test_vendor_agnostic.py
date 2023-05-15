@@ -1,7 +1,7 @@
 import pytest
 from vendor_agnostic.results_collector import ResultsCollector
 
-IP = ["postgresql", "mssql", "sqlite", "duckdb", "mariadb", "snowflake"]
+IP = ["postgresql", "mssql", "sqlite", "duckdb", "mariadb", "snowflake", "questdb"]
 
 BASE_DIR = "./src/tests/vendor_agnostic"
 
