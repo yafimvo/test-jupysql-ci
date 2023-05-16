@@ -25,7 +25,7 @@ def run(files, capsys):
             pytest.main(plugins=[collector], args=args_)
 
             with capsys.disabled():
-                print("\n\n============ Test results for {ip} ============")
+                print(f"\n\n============ Test results for {ip} ============")
                 print("passed : ", collector.passed)
                 print("failed : ", collector.failed)
                 print("xfailed : ", collector.xfailed)
