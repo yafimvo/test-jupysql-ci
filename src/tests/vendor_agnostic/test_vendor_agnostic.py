@@ -1,5 +1,7 @@
 import pytest
 from vendor_agnostic.results_collector import ResultsCollector
+from datetime import timedelta
+
 
 IP = ["postgresql", "mssql", "sqlite", "duckdb", "mariadb", "snowflake", "questdb"]
 
@@ -11,11 +13,16 @@ def test_ggplot(capsys):
     run(files, capsys)
 
 
-def run(files, capsys):
-    files = [f"{BASE_DIR}/{file}" for file in files]
+def test_plot(capsys):
+    files = ["test_plot.py"]
+    run(files, capsys)
 
+
+def run(files, capsys):
     collector = ResultsCollector()
-    for test_file in files:
+    for file in files:
+        test_file = f"{BASE_DIR}/{file}"
+
         for ip in IP:
             if ip == "snowflake":
                 args_ = ["--live", "-s", "--ip", ip, test_file]
@@ -25,7 +32,13 @@ def run(files, capsys):
             pytest.main(plugins=[collector], args=args_)
 
             with capsys.disabled():
-                print(f"\n\n============ Test results for {ip} ============")
+                time_sconds = collector.total_duration.__round__(2)
+                time_delta_ = timedelta(seconds=time_sconds)
+
+                print(
+                    f"\n\n============ {file} results for {ip} \
+                        in {time_sconds}s ({time_delta_}) ============"
+                )
                 print("passed : ", collector.passed)
                 print("failed : ", collector.failed)
                 print("xfailed : ", collector.xfailed)
