@@ -57,7 +57,8 @@ INTEGRATION = [
     "pymysql",
     "pgspecial==2.0.1",
     "pyodbc",
-    "snowflake-sqlalchemy < 2.2.0",
+    "snowflake-sqlalchemy",
+    "snowflake-connector-python==3.0.2"
 ]
 
 setup(
