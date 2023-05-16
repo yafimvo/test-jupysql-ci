@@ -17,9 +17,16 @@ def run(files, capsys):
     collector = ResultsCollector()
     for test_file in files:
         for ip in IP:
-            args_ = ["-s", "--ip", ip, test_file]
+            if ip == "snowflake":
+                args_ = ["--live", "-s", "--ip", ip, test_file]
+            else:
+                args_ = ["-s", "--ip", ip, test_file]
+
+            pytest.main(plugins=[collector], args=args_)
 
             with capsys.disabled():
-                pytest.main(plugins=[collector], args=args_)
-
+                print("passed : ", collector.passed)
+                print("failed : ", collector.failed)
+                print("xfailed : ", collector.xfailed)
+                print("skipped : ", collector.skipped)
         assert collector.failed == 0
