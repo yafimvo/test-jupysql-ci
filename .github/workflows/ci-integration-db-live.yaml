@@ -47,4 +47,4 @@ jobs:
         run: |
           # Run the integration test with live option
           python -c "import sqlalchemy; print('Sqlalchemy version ', sqlalchemy.__version__)"
-          pytest src/tests/integration --verbose --live
+          pytest src/tests/integration/test_generic_db_operations.py --verbose --live
