@@ -2,7 +2,6 @@ import pytest
 from vendor_agnostic.results_collector import ResultsCollector
 from datetime import timedelta
 
-
 IP = ["postgresql", "mssql", "sqlite", "duckdb", "mariadb", "snowflake", "questdb"]
 
 BASE_DIR = "./src/tests/vendor_agnostic"

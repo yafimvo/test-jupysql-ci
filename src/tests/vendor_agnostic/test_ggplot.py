@@ -105,6 +105,59 @@ def test_ggplot_geom_boxplot(yellow_trip_data):
 
 @_cleanup_cm()
 @image_comparison(
+    baseline_images=["boxplot"],
+    extensions=["png"],
+    remove_text=True,
+)
+def test_ggplot_geom_boxplot_vertical(yellow_trip_data):
+    (ggplot(yellow_trip_data, aes(x="trip_distance")) + geom_boxplot(orient="v"))
+
+
+@_cleanup_cm()
+@image_comparison(
+    baseline_images=["boxplot_horizontal"],
+    extensions=["png"],
+    remove_text=True,
+)
+def test_ggplot_geom_boxplot_horizontal(yellow_trip_data):
+    (ggplot(yellow_trip_data, aes(x="trip_distance")) + geom_boxplot(orient="h"))
+
+
+@_cleanup_cm()
+@image_comparison(
+    baseline_images=["boxplot_with_short_trips"],
+    extensions=["png"],
+    remove_text=True,
+)
+def test_ggplot_geom_boxplot_with(short_trips_data):
+    (ggplot(table="short_trips", with_="short_trips",
+     mapping=aes(x="trip_distance")) + geom_boxplot())
+
+
+@_cleanup_cm()
+@image_comparison(
+    baseline_images=["boxplot_with_short_trips"],
+    extensions=["png"],
+    remove_text=True,
+)
+def test_ggplot_geom_boxplot_vertical_with(short_trips_data):
+    (ggplot(table="short_trips", with_="short_trips",
+     mapping=aes(x="trip_distance")) + geom_boxplot(orient="v"))
+
+
+@_cleanup_cm()
+@image_comparison(
+    baseline_images=["boxplot_horizontal_with_short_trips"],
+    extensions=["png"],
+    remove_text=True,
+)
+def test_ggplot_geom_boxplot_horizontal_with(short_trips_data):
+    (ggplot(table="short_trips", with_="short_trips",
+     mapping=aes(x="trip_distance")) + geom_boxplot(orient="h"))
+
+
+@_cleanup_cm()
+@image_comparison(
     baseline_images=["histogram_default"], extensions=["png"], remove_text=True
 )
 def test_ggplot_geom_histogram(yellow_trip_data):
