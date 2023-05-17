@@ -130,8 +130,10 @@ def test_ggplot_geom_boxplot_horizontal(yellow_trip_data):
     remove_text=True,
 )
 def test_ggplot_geom_boxplot_with(short_trips_data):
-    (ggplot(table="short_trips", with_="short_trips",
-     mapping=aes(x="trip_distance")) + geom_boxplot())
+    (
+        ggplot(table="short_trips", with_="short_trips", mapping=aes(x="trip_distance"))
+        + geom_boxplot()
+    )
 
 
 @_cleanup_cm()
@@ -141,8 +143,10 @@ def test_ggplot_geom_boxplot_with(short_trips_data):
     remove_text=True,
 )
 def test_ggplot_geom_boxplot_vertical_with(short_trips_data):
-    (ggplot(table="short_trips", with_="short_trips",
-     mapping=aes(x="trip_distance")) + geom_boxplot(orient="v"))
+    (
+        ggplot(table="short_trips", with_="short_trips", mapping=aes(x="trip_distance"))
+        + geom_boxplot(orient="v")
+    )
 
 
 @_cleanup_cm()
@@ -152,8 +156,10 @@ def test_ggplot_geom_boxplot_vertical_with(short_trips_data):
     remove_text=True,
 )
 def test_ggplot_geom_boxplot_horizontal_with(short_trips_data):
-    (ggplot(table="short_trips", with_="short_trips",
-     mapping=aes(x="trip_distance")) + geom_boxplot(orient="h"))
+    (
+        ggplot(table="short_trips", with_="short_trips", mapping=aes(x="trip_distance"))
+        + geom_boxplot(orient="h")
+    )
 
 
 @_cleanup_cm()
