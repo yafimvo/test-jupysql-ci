@@ -37,7 +37,7 @@ def run(files, capsys):
 
                 print(
                     f"\n\n============ {file} results for {ip} \
-                        in {time_sconds}s ({time_delta_}) ============"
+in {time_sconds}s ({time_delta_}) ============"
                 )
                 print("passed : ", collector.passed)
                 print("failed : ", collector.failed)
