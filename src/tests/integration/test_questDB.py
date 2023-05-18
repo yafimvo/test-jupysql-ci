@@ -7,7 +7,7 @@ import urllib.request
 import requests
 from sql.ggplot import ggplot, aes, geom_histogram, facet_wrap, geom_boxplot
 from matplotlib.testing.decorators import image_comparison, _cleanup_cm
-from sql.connection import CustomConnection, CustomSession
+# from sql.connection import CustomConnection, CustomSession
 from IPython.core.error import UsageError
 
 """
