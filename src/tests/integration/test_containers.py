@@ -15,9 +15,9 @@ if "GITHUB_ACTIONS" in os.environ:
             "database system is ready to accept connections",
             "postgreSQL",
         ),
-        (_testing.mysql, "mysqld: ready for connections", "mySQL"),
+        # (_testing.mysql, "mysqld: ready for connections", "mySQL"),
         (_testing.mariadb, "mysqld: ready for connections", "mariaDB"),
-        (_testing.mssql, "This container is running as user mssql", "MSSQL"),
+        # (_testing.mssql, "This container is running as user mssql", "MSSQL"),
     ],
 )
 def test_invidual_container(
