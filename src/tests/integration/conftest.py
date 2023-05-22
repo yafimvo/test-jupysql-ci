@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from sqlalchemy import MetaData, create_engine
 from sql import _testing
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 import uuid
 
 

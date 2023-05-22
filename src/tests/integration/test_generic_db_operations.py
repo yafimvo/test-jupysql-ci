@@ -37,12 +37,12 @@ def mock_log_api(monkeypatch):
 @pytest.mark.parametrize(
     "ip_with_dynamic_db, expected",
     [
-        # ("ip_with_postgreSQL", 3),
+        ("ip_with_postgreSQL", 3),
         ("ip_with_mySQL", 3),
         ("ip_with_mariaDB", 3),
-        # ("ip_with_SQLite", 3),
-        # ("ip_with_duckDB", 3),
-        # ("ip_with_Snowflake", 3),
+        ("ip_with_SQLite", 3),
+        ("ip_with_duckDB", 3),
+        ("ip_with_Snowflake", 3),
     ],
 )
 def test_query_count(ip_with_dynamic_db, expected, request, test_table_name_dict):
