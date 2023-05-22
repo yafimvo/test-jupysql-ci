@@ -54,6 +54,8 @@ INTEGRATION = [
     "dockerctx",
     "pyarrow",
     "psycopg2-binary",
+    "psycopg-binary",
+    "psycopg-pool",
     "pymysql",
     "pgspecial==2.0.1",
     "pyodbc",
