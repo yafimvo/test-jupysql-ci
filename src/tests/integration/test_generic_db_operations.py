@@ -542,11 +542,11 @@ def test_sqlcmd_tables_columns(
     assert out.result
 
 
-# @pytest.mark.parametrize("ip_with_dynamic_db", ALL_DATABASES)
-# def test_sqlcmd_tables(ip_with_dynamic_db, request):
-#     ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
-#     out = ip_with_dynamic_db.run_cell("%sqlcmd tables")
-#     assert out.result
+@pytest.mark.parametrize("ip_with_dynamic_db", ALL_DATABASES)
+def test_sqlcmd_tables(ip_with_dynamic_db, request):
+    ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
+    out = ip_with_dynamic_db.run_cell("%sqlcmd tables")
+    assert out.result
 
 
 # @pytest.mark.parametrize(
