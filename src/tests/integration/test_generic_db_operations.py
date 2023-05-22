@@ -525,21 +525,21 @@ def test_profile_query(
             assert cell_value == str(expected[criteria][i])
 
 
-# @pytest.mark.parametrize(
-#     "table",
-#     [
-#         "numbers",
-#     ],
-# )
-# @pytest.mark.parametrize("ip_with_dynamic_db", ALL_DATABASES)
-# def test_sqlcmd_tables_columns(
-#     ip_with_dynamic_db, table, request, test_table_name_dict
-# ):
-#     ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
-#     out = ip_with_dynamic_db.run_cell(
-#         f"%sqlcmd columns --table {test_table_name_dict[table]}"
-#     )
-#     assert out.result
+@pytest.mark.parametrize(
+    "table",
+    [
+        "numbers",
+    ],
+)
+@pytest.mark.parametrize("ip_with_dynamic_db", ALL_DATABASES)
+def test_sqlcmd_tables_columns(
+    ip_with_dynamic_db, table, request, test_table_name_dict
+):
+    ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
+    out = ip_with_dynamic_db.run_cell(
+        f"%sqlcmd columns --table {test_table_name_dict[table]}"
+    )
+    assert out.result
 
 
 # @pytest.mark.parametrize("ip_with_dynamic_db", ALL_DATABASES)
