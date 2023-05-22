@@ -110,3 +110,29 @@ def test_create_table_with_indexed_df(
     assert expected_df.result.DataFrame().equals(
         out_df.result.DataFrame().loc[:, out_df.result.DataFrame().columns != "level_0"]
     )
+
+
+# Connection
+def get_connection_count(ip_with_dynamic_db):
+    out = ip_with_dynamic_db.run_line_magic("sql", "-l")
+    print("Current connections:", out)
+    connections_count = len(out)
+    return connections_count
+
+
+# Test - Number of active connection
+@pytest.mark.parametrize(
+    "ip_with_dynamic_db, expected",
+    [
+        ("ip_with_postgreSQL", 1),
+        ("ip_with_mySQL", 1),
+        ("ip_with_mariaDB", 1),
+        ("ip_with_SQLite", 1),
+        ("ip_with_duckDB", 1),
+        ("ip_with_MSSQL", 1),
+        ("ip_with_Snowflake", 1),
+    ],
+)
+def test_active_connection_number(ip_with_dynamic_db, expected, request):
+    ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
+    assert get_connection_count(ip_with_dynamic_db) == expected
