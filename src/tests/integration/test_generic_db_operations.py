@@ -136,3 +136,33 @@ def get_connection_count(ip_with_dynamic_db):
 def test_active_connection_number(ip_with_dynamic_db, expected, request):
     ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
     assert get_connection_count(ip_with_dynamic_db) == expected
+
+
+@pytest.mark.parametrize(
+    "ip_with_dynamic_db, config_key",
+    [
+        ("ip_with_postgreSQL", "postgreSQL"),
+        ("ip_with_mySQL", "mySQL"),
+        ("ip_with_mariaDB", "mariaDB"),
+        ("ip_with_SQLite", "SQLite"),
+        ("ip_with_duckDB", "duckDB"),
+        ("ip_with_MSSQL", "MSSQL"),
+        ("ip_with_Snowflake", "Snowflake"),
+    ],
+)
+def test_close_and_connect(
+    ip_with_dynamic_db, config_key, request, get_database_config_helper
+):
+    ip_with_dynamic_db = request.getfixturevalue(ip_with_dynamic_db)
+
+    conn_alias = get_database_config_helper.get_database_config(config_key)["alias"]
+    database_url = get_database_config_helper.get_database_url(config_key)
+    # Disconnect
+    ip_with_dynamic_db.run_cell("%sql -x " + conn_alias)
+    assert get_connection_count(ip_with_dynamic_db) == 0
+    # Connect, also check there is no error on re-connecting
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        ip_with_dynamic_db.run_cell("%sql " + database_url + " --alias " + conn_alias)
+
+    assert get_connection_count(ip_with_dynamic_db) == 1
