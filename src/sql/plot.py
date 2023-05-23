@@ -605,3 +605,239 @@ def _histogram_stacked(
     data = conn.execute(query, with_).fetchall()
 
     return data
+
+@modify_exceptions
+def _bar(table, column, with_=None, conn=None, facet=None):
+    """get x and height for bar plot"""
+    if not conn:
+        conn = sql.connection.Connection.current
+    use_backticks = conn.is_use_backtick_template()
+
+    template_ = """
+            select {{column}} as x,
+            count({{height}}) as height
+            from "{{table}}"
+            group by {{column}};
+            """
+    if use_backticks:
+            template_ = template_.replace('"', "`")
+
+    template = Template(template_)
+
+    query = template.render(
+        table=table, column=column
+    )
+
+    data = conn.execute(query, with_).fetchall()
+
+    x, height = zip(*data)
+
+    if x[0] is None:
+        raise ValueError("Data contains NULLs")
+    
+    return x, height
+
+
+@requires(["matplotlib"])
+@telemetry.log_call("bar", payload=True)
+def bar(
+    payload,
+    table,
+    column,
+    with_=None,
+    conn=None,
+    cmap=None,
+    color=None,
+    edgecolor=None,
+    ax=None,
+    facet=None,
+):
+    """Plot Bar Chart
+
+    Parameters
+    ----------
+    table : str
+        Table name where the data is located
+
+    column : str
+        Column(s) to plot
+
+    height : str
+        Height(s) column of the bars    
+
+    conn : connection, default=None
+        Database connection. If None, it uses the current connection
+
+    Notes
+    -----
+
+    .. versionadded:: 0.7.5
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        Generated plot
+
+    Examples
+    --------
+    .. plot:: ../examples/plot_bar.py
+
+    """
+
+    if not conn:
+        conn = sql.connection.Connection.current
+
+    ax = ax or plt.gca()
+    payload["connection_info"] = conn._get_curr_sqlalchemy_connection_info()
+
+    if column is None:
+        raise ValueError("Column name has not been specified")
+
+    x, height_ = _bar(table, column, with_=with_, conn=conn, facet=facet)
+
+    if color and cmap:
+        # raise a userwarning
+        warnings.warn(
+            "Both color and cmap are given. cmap will be ignored", UserWarning
+        )
+    
+    if (not color) and cmap :
+        cmap = plt.get_cmap(cmap)
+        norm = Normalize(vmin=0, vmax=len(x))
+        color = [cmap(norm(i)) for i in range(len(x))]
+
+    
+    ax.bar(
+        x,
+        height_,
+        align="center",
+        edgecolor=edgecolor,
+        color=color,
+    )
+
+    ax.set_title(f"Bar chart from {table!r}")
+
+    ax.set_ylabel("Count")
+    ax.set_xlabel(f"{column!r}")
+
+    return ax
+
+
+@modify_exceptions
+def _pie(table, column, with_=None, conn=None, facet=None):
+    """get x and height for bar plot"""
+    if not conn:
+        conn = sql.connection.Connection.current
+    use_backticks = conn.is_use_backtick_template()
+
+    if isinstance(column, list):
+        if len(column) > 2:
+            raise ValueError("Pie chart currently support 2 columns: labels and size")
+        template_ = """
+                select {{column[0]}} as x,
+                {{column[1]}} as height
+                from "{{table}}";
+                """
+    else:
+        template_ = """
+                select {{column}} as x,
+                count({{height}}) as height
+                from "{{table}}"
+                group by {{column}};
+                """
+    if use_backticks:
+            template_ = template_.replace('"', "`")
+
+    template = Template(template_)
+
+    query = template.render(
+        table=table, column=column
+    )
+
+    data = conn.execute(query, with_).fetchall()
+
+    labels, size = zip(*data)
+
+    if labels[0] is None:
+        raise ValueError("Data contains NULLs")
+    
+    return labels, size
+
+@requires(["matplotlib"])
+@telemetry.log_call("bar", payload=True)
+def pie(
+    payload,
+    table,
+    column,
+    with_=None,
+    conn=None,
+    cmap=None,
+    color=None,
+    edgecolor=None,
+    ax=None,
+    facet=None,
+):
+    """Plot Bar Chart
+
+    Parameters
+    ----------
+    table : str
+        Table name where the data is located
+
+    column : str
+        Column(s) to plot
+
+    height : str
+        Height(s) column of the bars    
+
+    conn : connection, default=None
+        Database connection. If None, it uses the current connection
+
+    Notes
+    -----
+
+    .. versionadded:: 0.7.5
+
+    Returns
+    -------
+    ax : matplotlib.Axes
+        Generated plot
+
+    Examples
+    --------
+    .. plot:: ../examples/plot_bar.py
+
+    """
+
+    if not conn:
+        conn = sql.connection.Connection.current
+
+    ax = ax or plt.gca()
+    payload["connection_info"] = conn._get_curr_sqlalchemy_connection_info()
+
+    if column is None:
+        raise ValueError("Column name has not been specified")
+
+    labels, size_ = _pie(table, column, with_=with_, conn=conn, facet=facet)
+
+    if color and cmap:
+        # raise a userwarning
+        warnings.warn(
+            "Both color and cmap are given. cmap will be ignored", UserWarning
+        )
+    
+    if (not color) and cmap :
+        cmap = plt.get_cmap(cmap)
+        norm = Normalize(vmin=0, vmax=len(labels))
+        color = [cmap(norm(i)) for i in range(len(labels))]
+
+    
+    ax.pie(
+        size_,
+        labels = labels,
+        colors=color,
+    )
+
+    ax.set_title(f"Pie chart from {table!r}")
+
+    return ax
