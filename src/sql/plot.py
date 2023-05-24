@@ -613,12 +613,23 @@ def _bar(table, column, with_=None, conn=None, facet=None):
         conn = sql.connection.Connection.current
     use_backticks = conn.is_use_backtick_template()
 
-    template_ = """
-            select {{column}} as x,
-            count({{height}}) as height
-            from "{{table}}"
-            group by {{column}};
+    if isinstance(column, list):
+        if len(column) > 2:
+            raise ValueError("Bar chart currently support, either a single column"
+                             " on which group by and count is applied or"
+                              " 2 columns: labels and size")
+        template_ = """
+            select "{{column[0]}}" as x,
+            "{{column[1]}}" as height
+            from "{{table}}";
             """
+    else:
+        template_ = """
+                select "{{column}}" as x,
+                count("{{column}}") as height
+                from "{{table}}"
+                group by "{{column}}";
+                """
     if use_backticks:
             template_ = template_.replace('"', "`")
 
@@ -661,9 +672,6 @@ def bar(
 
     column : str
         Column(s) to plot
-
-    height : str
-        Height(s) column of the bars    
 
     conn : connection, default=None
         Database connection. If None, it uses the current connection
@@ -732,18 +740,20 @@ def _pie(table, column, with_=None, conn=None, facet=None):
 
     if isinstance(column, list):
         if len(column) > 2:
-            raise ValueError("Pie chart currently support 2 columns: labels and size")
+            raise ValueError("Pie chart currently support, either a single column"
+                             " on which group by and count is applied or"
+                              " 2 columns: labels and size")
         template_ = """
-                select {{column[0]}} as x,
-                {{column[1]}} as height
+                select "{{column[0]}}" as x,
+                "{{column[1]}}" as height
                 from "{{table}}";
                 """
     else:
         template_ = """
-                select {{column}} as x,
-                count({{height}}) as height
+                select "{{column}}" as x,
+                count("{{column}}") as height
                 from "{{table}}"
-                group by {{column}};
+                group by "{{column}}";
                 """
     if use_backticks:
             template_ = template_.replace('"', "`")
@@ -785,10 +795,7 @@ def pie(
         Table name where the data is located
 
     column : str
-        Column(s) to plot
-
-    height : str
-        Height(s) column of the bars    
+        Column(s) to plot  
 
     conn : connection, default=None
         Database connection. If None, it uses the current connection
@@ -805,7 +812,7 @@ def pie(
 
     Examples
     --------
-    .. plot:: ../examples/plot_bar.py
+    .. plot:: ../examples/plot_pie.py
 
     """
 

@@ -11,12 +11,12 @@ import matplotlib.pyplot as plt
         [
             "%sqlplot someplot -t a -c b",
             UsageError,
-            "Unknown plot 'someplot'. Must be: 'histogram' or 'boxplot'",
+            "unknown plot 'someplot'. must be any of: ",
         ],
         [
             "%sqlplot -t a -c b",
             UsageError,
-            "Missing the first argument, must be: 'histogram' or 'boxplot'",
+            "missing the first argument, must be any of: ",
         ],
     ],
 )
@@ -49,7 +49,6 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
     assert str(out.error_in_exec) == (error_message)
 
 
-@pytest.mark.xfail()
 @pytest.mark.parametrize(
     "cell",
     [
@@ -66,6 +65,10 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         "%sqlplot boxplot --table subset --column x --with subset",
         "%sqlplot boxplot -t subset -c x -w subset -o h",
         "%sqlplot boxplot --table nas.csv --column x",
+        "%sqlplot bar -t data.csv -c x",
+        "%sqlplot bar -t data.csv -c x y",
+        "%sqlplot pie -t data.csv -c x",
+        "%sqlplot pie -t data.csv -c x y",
         pytest.param(
             "%sqlplot boxplot --table spaces.csv --column 'some column'",
             marks=pytest.mark.xfail(
@@ -75,6 +78,20 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         ),
         pytest.param(
             "%sqlplot histogram --table spaces.csv --column 'some column'",
+            marks=pytest.mark.xfail(
+                sys.platform == "win32",
+                reason="problem in IPython.core.magic_arguments.parse_argstring",
+            ),
+        ),
+        pytest.param(
+            "%sqlplot bar --table spaces.csv --column 'some column'",
+            marks=pytest.mark.xfail(
+                sys.platform == "win32",
+                reason="problem in IPython.core.magic_arguments.parse_argstring",
+            ),
+        ),
+        pytest.param(
+            "%sqlplot pie --table spaces.csv --column 'some column'",
             marks=pytest.mark.xfail(
                 sys.platform == "win32",
                 reason="problem in IPython.core.magic_arguments.parse_argstring",
@@ -94,6 +111,20 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
                 reason="problem in IPython.core.magic_arguments.parse_argstring",
             ),
         ),
+        pytest.param(
+            "%sqlplot bar --table 'file with spaces.csv' --column x",
+            marks=pytest.mark.xfail(
+                sys.platform == "win32",
+                reason="problem in IPython.core.magic_arguments.parse_argstring",
+            ),
+        ),
+        pytest.param(
+            "%sqlplot pie --table 'file with spaces.csv' --column x",
+            marks=pytest.mark.xfail(
+                sys.platform == "win32",
+                reason="problem in IPython.core.magic_arguments.parse_argstring",
+            ),
+        ),
     ],
     ids=[
         "histogram",
@@ -106,10 +137,18 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         "boxplot-with",
         "boxplot-shortcuts",
         "boxplot-nas",
+        "bar-1-col",
+        "bar-2-col",
+        "pie-1-col",
+        "pie-2-col",
         "boxplot-column-name-with-spaces",
         "histogram-column-name-with-spaces",
+        "bar-column-name-with-spaces",
+        "pie-column-name-with-spaces",
         "boxplot-table-name-with-spaces",
         "histogram-table-name-with-spaces",
+        "bar-table-name-with-spaces",
+        "pie-table-name-with-spaces",
     ],
 )
 def test_sqlplot(tmp_empty, ip, cell):
