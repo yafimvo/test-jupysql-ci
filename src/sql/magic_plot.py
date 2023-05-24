@@ -102,6 +102,7 @@ class SqlPlotMagic(Magics, Configurable):
                 table=table,
                 column=column,
                 with_=cmd.args.with_,
+                orient=cmd.args.orient,
                 conn=None,
             )
         elif cmd.args.line[0] in {"pie"}:

@@ -656,6 +656,7 @@ def bar(
     payload,
     table,
     column,
+    orient='v',
     with_=None,
     conn=None,
     cmap=None,
@@ -673,6 +674,9 @@ def bar(
 
     column : str
         Column(s) to plot
+
+    orient : str, default='v'
+        Orientation of the plot. 'v' for vertical and 'h' for horizontal
 
     conn : connection, default=None
         Database connection. If None, it uses the current connection
@@ -715,18 +719,28 @@ def bar(
         norm = Normalize(vmin=0, vmax=len(x))
         color = [cmap(norm(i)) for i in range(len(x))]
 
-    ax.bar(
-        x,
-        height_,
-        align="center",
-        edgecolor=edgecolor,
-        color=color,
-    )
+    if orient == "h":
+        ax.barh(
+            x,
+            height_,
+            align="center",
+            edgecolor=edgecolor,
+            color=color,
+        )
+        ax.set_xlabel("Count")
+        ax.set_ylabel(f"{column!r}")
+    else:
+        ax.bar(
+            x,
+            height_,
+            align="center",
+            edgecolor=edgecolor,
+            color=color,
+        )
+        ax.set_ylabel("Count")
+        ax.set_xlabel(f"{column!r}")
 
     ax.set_title(f"Bar chart from {table!r}")
-
-    ax.set_ylabel("Count")
-    ax.set_xlabel(f"{column!r}")
 
     return ax
 
