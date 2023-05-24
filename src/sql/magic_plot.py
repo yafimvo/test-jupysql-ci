@@ -19,6 +19,7 @@ from sql import util
 
 SUPPORTED_PLOTS = {"histogram", "boxplot", "bar", "pie"}
 
+
 @magics_class
 class SqlPlotMagic(Magics, Configurable):
     """%sqlplot magic"""

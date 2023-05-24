@@ -606,6 +606,7 @@ def _histogram_stacked(
 
     return data
 
+
 @modify_exceptions
 def _bar(table, column, with_=None, conn=None, facet=None):
     """get x and height for bar plot"""
@@ -615,9 +616,11 @@ def _bar(table, column, with_=None, conn=None, facet=None):
 
     if isinstance(column, list):
         if len(column) > 2:
-            raise ValueError("Bar chart currently support, either a single column"
-                             " on which group by and count is applied or"
-                              " 2 columns: labels and size")
+            raise ValueError(
+                "Bar chart currently support, either a single column"
+                " on which group by and count is applied or"
+                " 2 columns: labels and size"
+            )
         template_ = """
             select "{{column[0]}}" as x,
             "{{column[1]}}" as height
@@ -631,13 +634,11 @@ def _bar(table, column, with_=None, conn=None, facet=None):
                 group by "{{column}}";
                 """
     if use_backticks:
-            template_ = template_.replace('"', "`")
+        template_ = template_.replace('"', "`")
 
     template = Template(template_)
 
-    query = template.render(
-        table=table, column=column
-    )
+    query = template.render(table=table, column=column)
 
     data = conn.execute(query, with_).fetchall()
 
@@ -645,7 +646,7 @@ def _bar(table, column, with_=None, conn=None, facet=None):
 
     if x[0] is None:
         raise ValueError("Data contains NULLs")
-    
+
     return x, height
 
 
@@ -708,13 +709,12 @@ def bar(
         warnings.warn(
             "Both color and cmap are given. cmap will be ignored", UserWarning
         )
-    
-    if (not color) and cmap :
+
+    if (not color) and cmap:
         cmap = plt.get_cmap(cmap)
         norm = Normalize(vmin=0, vmax=len(x))
         color = [cmap(norm(i)) for i in range(len(x))]
 
-    
     ax.bar(
         x,
         height_,
@@ -740,9 +740,11 @@ def _pie(table, column, with_=None, conn=None, facet=None):
 
     if isinstance(column, list):
         if len(column) > 2:
-            raise ValueError("Pie chart currently support, either a single column"
-                             " on which group by and count is applied or"
-                              " 2 columns: labels and size")
+            raise ValueError(
+                "Pie chart currently support, either a single column"
+                " on which group by and count is applied or"
+                " 2 columns: labels and size"
+            )
         template_ = """
                 select "{{column[0]}}" as x,
                 "{{column[1]}}" as height
@@ -756,13 +758,11 @@ def _pie(table, column, with_=None, conn=None, facet=None):
                 group by "{{column}}";
                 """
     if use_backticks:
-            template_ = template_.replace('"', "`")
+        template_ = template_.replace('"', "`")
 
     template = Template(template_)
 
-    query = template.render(
-        table=table, column=column
-    )
+    query = template.render(table=table, column=column)
 
     data = conn.execute(query, with_).fetchall()
 
@@ -770,8 +770,9 @@ def _pie(table, column, with_=None, conn=None, facet=None):
 
     if labels[0] is None:
         raise ValueError("Data contains NULLs")
-    
+
     return labels, size
+
 
 @requires(["matplotlib"])
 @telemetry.log_call("bar", payload=True)
@@ -795,7 +796,7 @@ def pie(
         Table name where the data is located
 
     column : str
-        Column(s) to plot  
+        Column(s) to plot
 
     conn : connection, default=None
         Database connection. If None, it uses the current connection
@@ -832,16 +833,15 @@ def pie(
         warnings.warn(
             "Both color and cmap are given. cmap will be ignored", UserWarning
         )
-    
-    if (not color) and cmap :
+
+    if (not color) and cmap:
         cmap = plt.get_cmap(cmap)
         norm = Normalize(vmin=0, vmax=len(labels))
         color = [cmap(norm(i)) for i in range(len(labels))]
 
-    
     ax.pie(
         size_,
-        labels = labels,
+        labels=labels,
         colors=color,
     )
 
