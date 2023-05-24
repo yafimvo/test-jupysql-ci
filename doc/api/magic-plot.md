@@ -160,3 +160,83 @@ ax = %sqlplot histogram --table no_nulls --column body_mass_g --with no_nulls
 ax.set_title("Body mass (grams)")
 _ = ax.grid()
 ```
+## `%sqlplot bar`
+
+Shortcut: `%sqlplot bar`
+
+`-t`/`--table` Table to use (if using DuckDB: path to the file to query)
+
+`-c`/`--column` Column to plot.
+
+`-o`/`--orient` Barplot orientation (`h` for horizontal, `v` for vertical)
+
+`-w`/`--with` Use a previously saved query as input data
+
+Barplot does not support NULL values, so let's remove them:
+
+```{code-cell} ipython3
+%%sql --save no_nulls --no-execute
+SELECT *
+FROM penguins.csv
+WHERE species IS NOT NULL
+```
+
+```{code-cell} ipython3
+%sqlplot bar --table no_nulls --column species --with no_nulls
+```
+
+You can additionally pass two columns to bar plot i.e. `x` and `height` columns.
+
+```{code-cell} ipython3
+%%sql --save add_col --no-execute --with no_nulls
+SELECT species, count(species) as cnt
+FROM no_nulls
+group by species
+```
+
+```{code-cell} ipython3
+%sqlplot bar --table add_col --column species cnt --with add_col
+```
+
+You can also pass the orientation using the `orient` argument.
+
+```{code-cell} ipython3
+%sqlplot bar --table add_col --column species cnt --with add_col --orient h
+``` 
+
+## `%sqlplot pie`
+
+Shortcut: `%sqlplot bar`
+
+`-t`/`--table` Table to use (if using DuckDB: path to the file to query)
+
+`-c`/`--column` Column to plot
+
+`-w`/`--with` Use a previously saved query as input data
+
+Barplot does not support NULL values, so let's remove them:
+
+```{code-cell} ipython3
+%%sql --save no_nulls --no-execute
+SELECT *
+FROM penguins.csv
+WHERE species IS NOT NULL
+```
+
+```{code-cell} ipython3
+%sqlplot pie --table no_nulls --column species --with no_nulls
+```
+
+You can additionally pass two columns to bar plot i.e. `labels` and `x` columns.
+
+```{code-cell} ipython3
+%%sql --save add_col --no-execute --with no_nulls
+SELECT species, count(species) as cnt
+FROM no_nulls
+group by species
+```
+
+```{code-cell} ipython3
+%sqlplot pie --table add_col --column species cnt --with add_col
+```
+Here, `species` is the `labels` column and `cnt` is the `x` column.

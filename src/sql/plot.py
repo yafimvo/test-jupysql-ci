@@ -760,8 +760,8 @@ def _pie(table, column, with_=None, conn=None, facet=None):
                 " 2 columns: labels and size"
             )
         template_ = """
-                select "{{column[0]}}" as x,
-                "{{column[1]}}" as height
+                select "{{column[0]}}" as labels,
+                "{{column[1]}}" as size
                 from "{{table}}";
                 """
     else:
