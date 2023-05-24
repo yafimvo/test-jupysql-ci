@@ -6,6 +6,7 @@
 * [Feature] Better error messages when function used in plotting API unsupported by DB driver (#159)
 * [Fix] Fix the default value of %config SqlMagic.displaylimit to 10 (#462)
 * [Feature] Detailed error messages when syntax error in SQL query, postgres connection password missing or inaccessible, invalid DuckDB connection string (#229)
+* [Feature] Added bar plot and pie charts to %sqlplot (#508)
 
 
 ## 0.7.4 (2023-04-28)
