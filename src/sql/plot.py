@@ -656,7 +656,7 @@ def bar(
     payload,
     table,
     column,
-    orient='v',
+    orient="v",
     with_=None,
     conn=None,
     cmap=None,
