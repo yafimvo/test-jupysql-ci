@@ -53,6 +53,12 @@ class SqlPlotMagic(Magics, Configurable):
         action="append",
         dest="with_",
     )
+    @argument(
+        "-sn",
+        "--show_num",
+        action="store_true",
+        help="Show number of observations",
+    )
     @modify_exceptions
     def execute(self, line="", cell="", local_ns=None):
         """
@@ -104,6 +110,7 @@ class SqlPlotMagic(Magics, Configurable):
                 column=column,
                 with_=cmd.args.with_,
                 orient=cmd.args.orient,
+                show_num=cmd.args.show_num,
                 conn=None,
             )
         elif cmd.args.line[0] in {"pie"}:
@@ -113,6 +120,7 @@ class SqlPlotMagic(Magics, Configurable):
                 table=table,
                 column=column,
                 with_=cmd.args.with_,
+                show_num=cmd.args.show_num,
                 conn=None,
             )
         else:

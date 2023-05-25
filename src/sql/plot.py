@@ -676,6 +676,7 @@ def bar(
     payload,
     table,
     column,
+    show_num=False,
     orient="v",
     with_=None,
     conn=None,
@@ -759,6 +760,30 @@ def bar(
         ax.set_ylabel(ylabel)
         ax.set_xlabel(xlabel)
 
+    if show_num:
+        if orient == "v":
+            for i, v in enumerate(height_):
+                ax.text(
+                    i,
+                    v,
+                    str(v),
+                    color="black",
+                    fontweight="bold",
+                    ha="center",
+                    va="bottom",
+                )
+        else:
+            for i, v in enumerate(height_):
+                ax.text(
+                    v,
+                    i,
+                    str(v),
+                    color="black",
+                    fontweight="bold",
+                    ha="left",
+                    va="center",
+                )
+
     ax.set_title(table)
 
     return ax
@@ -823,6 +848,7 @@ def pie(
     payload,
     table,
     column,
+    show_num=False,
     with_=None,
     conn=None,
     cmap=None,
@@ -880,11 +906,19 @@ def pie(
         norm = Normalize(vmin=0, vmax=len(labels))
         color = [cmap(norm(i)) for i in range(len(labels))]
 
-    ax.pie(
-        size_,
-        labels=labels,
-        colors=color,
-    )
+    if show_num:
+        ax.pie(
+            size_,
+            labels=labels,
+            colors=color,
+            autopct="%1.1f%%",
+        )
+    else:
+        ax.pie(
+            size_,
+            labels=labels,
+            colors=color,
+        )
 
     ax.set_title(table)
 
