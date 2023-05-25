@@ -911,7 +911,7 @@ def pie(
             size_,
             labels=labels,
             colors=color,
-            autopct="%1.1f%%",
+            autopct="%1.2f%%",
         )
     else:
         ax.pie(
