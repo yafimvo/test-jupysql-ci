@@ -17,7 +17,7 @@ from sql.command import SQLPlotCommand
 from sql import exceptions
 from sql import util
 
-SUPPORTED_PLOTS = {"histogram", "boxplot", "bar", "pie"}
+SUPPORTED_PLOTS = ["histogram", "boxplot", "bar", "pie"]
 
 
 @magics_class
@@ -67,9 +67,10 @@ class SqlPlotMagic(Magics, Configurable):
             column = cmd.args.column
 
         if not cmd.args.line:
+            plot_str = util.pretty_print(SUPPORTED_PLOTS, last_delimiter="or")
             raise exceptions.UsageError(
                 "Missing the first argument, must be any of: "
-                f"{SUPPORTED_PLOTS}"
+                f"{plot_str}\n"
                 "Example: %sqlplot histogram"
             )
 
@@ -115,7 +116,7 @@ class SqlPlotMagic(Magics, Configurable):
                 conn=None,
             )
         else:
+            plot_str = util.pretty_print(SUPPORTED_PLOTS, last_delimiter="or")
             raise exceptions.UsageError(
-                f"Unknown plot {cmd.args.line[0]!r}. Must be any of: "
-                f"{SUPPORTED_PLOTS}"
+                f"Unknown plot {cmd.args.line[0]!r}. Must be any of: " f"{plot_str}"
             )

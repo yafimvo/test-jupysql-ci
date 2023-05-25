@@ -3,6 +3,10 @@ from pathlib import Path
 import pytest
 from IPython.core.error import UsageError
 import matplotlib.pyplot as plt
+from sql import util
+
+SUPPORTED_PLOTS = ["bar", "boxplot", "histogram", "pie"]
+plot_str = util.pretty_print(SUPPORTED_PLOTS, last_delimiter="or")
 
 
 @pytest.mark.parametrize(
@@ -11,12 +15,12 @@ import matplotlib.pyplot as plt
         [
             "%sqlplot someplot -t a -c b",
             UsageError,
-            "unknown plot 'someplot'. must be any of: ",
+            f"Unknown plot 'someplot'. Must be any of: {plot_str}",
         ],
         [
             "%sqlplot -t a -c b",
             UsageError,
-            "missing the first argument, must be any of: ",
+            f"Missing the first argument, must be any of: {plot_str}",
         ],
     ],
 )
