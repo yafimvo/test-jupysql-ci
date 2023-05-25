@@ -663,7 +663,6 @@ def bar(
     color=None,
     edgecolor=None,
     ax=None,
-    facet=None,
 ):
     """Plot Bar Chart
 
@@ -706,7 +705,7 @@ def bar(
     if column is None:
         raise ValueError("Column name has not been specified")
 
-    x, height_ = _bar(table, column, with_=with_, conn=conn, facet=facet)
+    x, height_ = _bar(table, column, with_=with_, conn=conn)
 
     if color and cmap:
         # raise a userwarning
@@ -746,7 +745,7 @@ def bar(
 
 
 @modify_exceptions
-def _pie(table, column, with_=None, conn=None, facet=None):
+def _pie(table, column, with_=None, conn=None):
     """get x and height for bar plot"""
     if not conn:
         conn = sql.connection.Connection.current
@@ -798,11 +797,9 @@ def pie(
     conn=None,
     cmap=None,
     color=None,
-    edgecolor=None,
     ax=None,
-    facet=None,
 ):
-    """Plot Bar Chart
+    """Plot Pie Chart
 
     Parameters
     ----------
@@ -840,7 +837,7 @@ def pie(
     if column is None:
         raise ValueError("Column name has not been specified")
 
-    labels, size_ = _pie(table, column, with_=with_, conn=conn, facet=facet)
+    labels, size_ = _pie(table, column, with_=with_, conn=conn)
 
     if color and cmap:
         # raise a userwarning
