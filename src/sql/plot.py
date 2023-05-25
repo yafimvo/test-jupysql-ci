@@ -608,7 +608,7 @@ def _histogram_stacked(
 
 
 @modify_exceptions
-def _bar(table, column, with_=None, conn=None, facet=None):
+def _bar(table, column, with_=None, conn=None):
     """get x and height for bar plot"""
     if not conn:
         conn = sql.connection.Connection.current
