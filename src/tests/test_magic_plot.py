@@ -70,38 +70,16 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         "%sqlplot boxplot -t subset -c x -w subset -o h",
         "%sqlplot boxplot --table nas.csv --column x",
         "%sqlplot bar -t data.csv -c x",
+        "%sqlplot bar -t data.csv -c x -sn",
         "%sqlplot bar -t data.csv -c x -o h",
         "%sqlplot bar -t data.csv -c x y",
         "%sqlplot pie -t data.csv -c x",
+        "%sqlplot pie -t data.csv -c x -sn",
         "%sqlplot pie -t data.csv -c x y",
-        pytest.param(
-            "%sqlplot boxplot --table spaces.csv --column 'some column'",
-            marks=pytest.mark.xfail(
-                sys.platform == "win32",
-                reason="problem in IPython.core.magic_arguments.parse_argstring",
-            ),
-        ),
-        pytest.param(
-            "%sqlplot histogram --table spaces.csv --column 'some column'",
-            marks=pytest.mark.xfail(
-                sys.platform == "win32",
-                reason="problem in IPython.core.magic_arguments.parse_argstring",
-            ),
-        ),
-        pytest.param(
-            "%sqlplot bar --table spaces.csv --column 'some column'",
-            marks=pytest.mark.xfail(
-                sys.platform == "win32",
-                reason="problem in IPython.core.magic_arguments.parse_argstring",
-            ),
-        ),
-        pytest.param(
-            "%sqlplot pie --table spaces.csv --column 'some column'",
-            marks=pytest.mark.xfail(
-                sys.platform == "win32",
-                reason="problem in IPython.core.magic_arguments.parse_argstring",
-            ),
-        ),
+        "%sqlplot boxplot --table spaces.csv --column \"some column\"",
+        "%sqlplot histogram --table spaces.csv --column \"some column\"",
+        "%sqlplot bar --table spaces.csv --column \"some column\"",
+        "%sqlplot pie --table spaces.csv --column \"some column\"",
         pytest.param(
             "%sqlplot boxplot --table 'file with spaces.csv' --column x",
             marks=pytest.mark.xfail(
@@ -143,9 +121,11 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         "boxplot-shortcuts",
         "boxplot-nas",
         "bar-1-col",
+        "bar-1-col-show_num",
         "bar-1-col-horizontal",
         "bar-2-col",
         "pie-1-col",
+        "pie-1-col-show_num",
         "pie-2-col",
         "boxplot-column-name-with-spaces",
         "histogram-column-name-with-spaces",
