@@ -617,15 +617,32 @@ def _bar(table, column, with_=None, conn=None, facet=None):
     if isinstance(column, list):
         if len(column) > 2:
             raise ValueError(
-                "Bar chart currently support, either a single column"
+                f"Passed columns: {column}\n"
+                "Bar chart currently supports, either a single column"
                 " on which group by and count is applied or"
                 " 2 columns: labels and size"
             )
+
+        x_ = column[0]
+        height_ = column[1]
+
         template_ = """
-            select "{{column[0]}}" as x,
-            "{{column[1]}}" as height
+            select "{{x_}}" as x,
+            "{{height_}}" as height
             from "{{table}}";
             """
+
+        xlabel = x_
+        ylabel = height_
+
+        if use_backticks:
+            template_ = template_.replace('"', "`")
+
+        template = Template(template_)
+        print(x_, height_)
+        query = template.render(table=table, x_=x_, height_=height_)
+        print(template, "\n", query)
+
     else:
         template_ = """
                 select "{{column}}" as x,
@@ -633,12 +650,15 @@ def _bar(table, column, with_=None, conn=None, facet=None):
                 from "{{table}}"
                 group by "{{column}}";
                 """
-    if use_backticks:
-        template_ = template_.replace('"', "`")
 
-    template = Template(template_)
+        xlabel = column
+        ylabel = "Count"
 
-    query = template.render(table=table, column=column)
+        if use_backticks:
+            template_ = template_.replace('"', "`")
+
+        template = Template(template_)
+        query = template.render(table=table, column=column)
 
     data = conn.execute(query, with_).fetchall()
 
@@ -647,7 +667,7 @@ def _bar(table, column, with_=None, conn=None, facet=None):
     if x[0] is None:
         raise ValueError("Data contains NULLs")
 
-    return x, height
+    return x, height, xlabel, ylabel
 
 
 @requires(["matplotlib"])
@@ -705,7 +725,7 @@ def bar(
     if column is None:
         raise ValueError("Column name has not been specified")
 
-    x, height_ = _bar(table, column, with_=with_, conn=conn)
+    x, height_, xlabel, ylabel = _bar(table, column, with_=with_, conn=conn)
 
     if color and cmap:
         # raise a userwarning
@@ -726,8 +746,8 @@ def bar(
             edgecolor=edgecolor,
             color=color,
         )
-        ax.set_xlabel("Count")
-        ax.set_ylabel(f"{column!r}")
+        ax.set_xlabel(ylabel)
+        ax.set_ylabel(xlabel)
     else:
         ax.bar(
             x,
@@ -736,10 +756,10 @@ def bar(
             edgecolor=edgecolor,
             color=color,
         )
-        ax.set_ylabel("Count")
-        ax.set_xlabel(f"{column!r}")
+        ax.set_ylabel(ylabel)
+        ax.set_xlabel(xlabel)
 
-    ax.set_title(f"Bar chart from {table!r}")
+    ax.set_title(table)
 
     return ax
 
@@ -754,15 +774,26 @@ def _pie(table, column, with_=None, conn=None):
     if isinstance(column, list):
         if len(column) > 2:
             raise ValueError(
+                f"Passed columns: {column}\n"
                 "Pie chart currently support, either a single column"
                 " on which group by and count is applied or"
                 " 2 columns: labels and size"
             )
+
+        labels_ = column[0]
+        size_ = column[1]
+
         template_ = """
-                select "{{column[0]}}" as labels,
-                "{{column[1]}}" as size
+                select "{{labels_}}" as labels,
+                "{{size_}}" as size
                 from "{{table}}";
                 """
+        if use_backticks:
+            template_ = template_.replace('"', "`")
+
+        template = Template(template_)
+        query = template.render(table=table, labels_=labels_, size_=size_)
+
     else:
         template_ = """
                 select "{{column}}" as x,
@@ -770,12 +801,11 @@ def _pie(table, column, with_=None, conn=None):
                 from "{{table}}"
                 group by "{{column}}";
                 """
-    if use_backticks:
-        template_ = template_.replace('"', "`")
+        if use_backticks:
+            template_ = template_.replace('"', "`")
 
-    template = Template(template_)
-
-    query = template.render(table=table, column=column)
+        template = Template(template_)
+        query = template.render(table=table, column=column)
 
     data = conn.execute(query, with_).fetchall()
 
@@ -856,6 +886,6 @@ def pie(
         colors=color,
     )
 
-    ax.set_title(f"Pie chart from {table!r}")
+    ax.set_title(table)
 
     return ax
