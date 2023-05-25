@@ -206,7 +206,7 @@ You can also pass the orientation using the `orient` argument.
 
 ## `%sqlplot pie`
 
-Shortcut: `%sqlplot bar`
+Shortcut: `%sqlplot pie`
 
 `-t`/`--table` Table to use (if using DuckDB: path to the file to query)
 
@@ -214,7 +214,7 @@ Shortcut: `%sqlplot bar`
 
 `-w`/`--with` Use a previously saved query as input data
 
-Barplot does not support NULL values, so let's remove them:
+Pie chart does not support NULL values, so let's remove them:
 
 ```{code-cell} ipython3
 %%sql --save no_nulls --no-execute
