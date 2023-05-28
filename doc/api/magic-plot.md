@@ -172,7 +172,7 @@ Shortcut: `%sqlplot bar`
 
 `-w`/`--with` Use a previously saved query as input data
 
-`-sn`/`--show_num` Show number on top of the bar
+`-S`/`--show-numbers` Show numbers on top of the bar
 
 Barplot does not support NULL values, so let's remove them:
 
@@ -206,10 +206,10 @@ You can also pass the orientation using the `orient` argument.
 %sqlplot bar --table add_col --column species cnt --with add_col --orient h
 ``` 
 
-You can also show the number on top of the bar using the `show_num` argument.
+You can also show the number on top of the bar using the `S`/`show-numbers` argument.
 
 ```{code-cell} ipython3
-%sqlplot bar --table no_nulls --column species --with no_nulls -sn
+%sqlplot bar --table no_nulls --column species --with no_nulls -S
 ```
 
 ## `%sqlplot pie`
@@ -222,7 +222,7 @@ Shortcut: `%sqlplot pie`
 
 `-w`/`--with` Use a previously saved query as input data
 
-`-sn`/`--show_num` Show the percentage on top of the pie
+`-S`/`--show-numbers` Show the percentage on top of the pie
 
 Pie chart does not support NULL values, so let's remove them:
 
@@ -252,8 +252,8 @@ group by species
 Here, `species` is the `labels` column and `cnt` is the `x` column.
 
 
-You can also show the percentage on top of the pie using the `show_num` argument.
+You can also show the percentage on top of the pie using the `S`/`show-numbers` argument.
 
 ```{code-cell} ipython3
-%sqlplot pie --table no_nulls --column species --with no_nulls -sn
+%sqlplot pie --table no_nulls --column species --with no_nulls -S
 ```

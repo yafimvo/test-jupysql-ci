@@ -54,8 +54,8 @@ class SqlPlotMagic(Magics, Configurable):
         dest="with_",
     )
     @argument(
-        "-sn",
-        "--show_num",
+        "-S",
+        "--show-numbers",
         action="store_true",
         help="Show number of observations",
     )
@@ -110,7 +110,7 @@ class SqlPlotMagic(Magics, Configurable):
                 column=column,
                 with_=cmd.args.with_,
                 orient=cmd.args.orient,
-                show_num=cmd.args.show_num,
+                show_num=cmd.args.show_numbers,
                 conn=None,
             )
         elif cmd.args.line[0] in {"pie"}:
@@ -120,7 +120,7 @@ class SqlPlotMagic(Magics, Configurable):
                 table=table,
                 column=column,
                 with_=cmd.args.with_,
-                show_num=cmd.args.show_num,
+                show_num=cmd.args.show_numbers,
                 conn=None,
             )
         else:
