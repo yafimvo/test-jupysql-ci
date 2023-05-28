@@ -162,6 +162,9 @@ _ = ax.grid()
 ```
 ## `%sqlplot bar`
 
+```{versionadded} 0.7.6
+```
+
 Shortcut: `%sqlplot bar`
 
 `-t`/`--table` Table to use (if using DuckDB: path to the file to query)
@@ -213,6 +216,9 @@ You can also show the number on top of the bar using the `S`/`show-numbers` argu
 ```
 
 ## `%sqlplot pie`
+
+```{versionadded} 0.7.6
+```
 
 Shortcut: `%sqlplot pie`
 
