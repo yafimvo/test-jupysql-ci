@@ -616,11 +616,11 @@ def _bar(table, column, with_=None, conn=None):
 
     if isinstance(column, list):
         if len(column) > 2:
-            raise ValueError(
+            raise exceptions.UsageError(
                 f"Passed columns: {column}\n"
                 "Bar chart currently supports, either a single column"
                 " on which group by and count is applied or"
-                " 2 columns: labels and size"
+                " two columns: labels and size"
             )
 
         x_ = column[0]
@@ -639,9 +639,7 @@ def _bar(table, column, with_=None, conn=None):
             template_ = template_.replace('"', "`")
 
         template = Template(template_)
-        print(x_, height_)
         query = template.render(table=table, x_=x_, height_=height_)
-        print(template, "\n", query)
 
     else:
         template_ = """
@@ -798,11 +796,11 @@ def _pie(table, column, with_=None, conn=None):
 
     if isinstance(column, list):
         if len(column) > 2:
-            raise ValueError(
+            raise exceptions.UsageError(
                 f"Passed columns: {column}\n"
                 "Pie chart currently support, either a single column"
                 " on which group by and count is applied or"
-                " 2 columns: labels and size"
+                " two columns: labels and size"
             )
 
         labels_ = column[0]
