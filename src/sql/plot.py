@@ -798,7 +798,7 @@ def _pie(table, column, with_=None, conn=None):
         if len(column) > 2:
             raise exceptions.UsageError(
                 f"Passed columns: {column}\n"
-                "Pie chart currently support, either a single column"
+                "Pie chart currently supports, either a single column"
                 " on which group by and count is applied or"
                 " two columns: labels and size"
             )
