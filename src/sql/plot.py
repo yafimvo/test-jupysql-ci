@@ -722,7 +722,7 @@ def bar(
     payload["connection_info"] = conn._get_curr_sqlalchemy_connection_info()
 
     if column is None:
-        raise ValueError("Column name has not been specified")
+        raise exceptions.UsageError("Column name has not been specified")
 
     x, height_, xlabel, ylabel = _bar(table, column, with_=with_, conn=conn)
 
@@ -889,7 +889,7 @@ def pie(
     payload["connection_info"] = conn._get_curr_sqlalchemy_connection_info()
 
     if column is None:
-        raise ValueError("Column name has not been specified")
+        raise exceptions.UsageError("Column name has not been specified")
 
     labels, size_ = _pie(table, column, with_=with_, conn=conn)
 
