@@ -197,22 +197,25 @@ WHERE x > -1
 
 @pytest.fixture
 def load_data_two_col(ip):
-    Path("data_two.csv").write_text(
-        """\
+    if not Path("data_two.csv").is_file():
+        Path("data_two.csv").write_text(
+            """\
 x, y
 0, 0
 1, 1
 2, 2
 5,7
-"""
-    )
+            """
+            )
+        
     ip.run_cell("%sql duckdb://")
 
 
 @pytest.fixture
 def load_data_one_col(ip):
-    Path("data.csv").write_text(
-        """\
+    if not Path("data_one.csv").is_file():
+        Path("data_one.csv").write_text(
+            """\
 x
 0
 0
@@ -221,31 +224,31 @@ x
 1
 2
 """
-    )
+        )
     ip.run_cell("%sql duckdb://")
 
 
 @image_comparison(baseline_images=["bar_one_col"], extensions=["png"])
 def test_bar_one_col(load_data_one_col, ip):
-    ip.run_cell("%sqlplot bar -t data.csv -c x")
+    ip.run_cell("%sqlplot bar -t data_one.csv -c x")
     _cleanup_cm()
 
 
 @image_comparison(baseline_images=["bar_one_col_h"], extensions=["png"])
 def test_bar_one_col_h(load_data_one_col, ip):
-    ip.run_cell("%sqlplot bar -t data.csv -c x -o h")
+    ip.run_cell("%sqlplot bar -t data_one.csv -c x -o h")
     _cleanup_cm()
 
 
 @image_comparison(baseline_images=["bar_one_col_num_h"], extensions=["png"])
 def test_bar_one_col_num_h(load_data_one_col, ip):
-    ip.run_cell("%sqlplot bar -t data.csv -c x -o h -S")
+    ip.run_cell("%sqlplot bar -t data_one.csv -c x -o h -S")
     _cleanup_cm()
 
 
 @image_comparison(baseline_images=["bar_one_col_num_v"], extensions=["png"])
 def test_bar_one_col_num_v(load_data_one_col, ip):
-    ip.run_cell("%sqlplot bar -t data.csv -c x -S")
+    ip.run_cell("%sqlplot bar -t data_one.csv -c x -S")
     _cleanup_cm()
 
 
@@ -257,13 +260,13 @@ def test_bar_two_col(load_data_two_col, ip):
 
 @image_comparison(baseline_images=["pie_one_col"], extensions=["png"])
 def test_pie_one_col(load_data_one_col, ip):
-    ip.run_cell("%sqlplot pie -t data.csv -c x")
+    ip.run_cell("%sqlplot pie -t data_one.csv -c x")
     _cleanup_cm()
 
 
 @image_comparison(baseline_images=["pie_one_col_num"], extensions=["png"])
 def test_pie_one_col_num(load_data_one_col, ip):
-    ip.run_cell("%sqlplot pie -t data.csv -c x -S")
+    ip.run_cell("%sqlplot pie -t data_one.csv -c x -S")
     _cleanup_cm()
 
 
