@@ -78,10 +78,10 @@ def test_validate_arguments(tmp_empty, ip, cell, error_type, error_message):
         "%sqlplot pie -t data.csv -c x",
         "%sqlplot pie -t data.csv -c x -S",
         "%sqlplot pie -t data.csv -c x y",
-        "%sqlplot boxplot --table spaces.csv --column \"some column\"",
-        "%sqlplot histogram --table spaces.csv --column \"some column\"",
-        "%sqlplot bar --table spaces.csv --column \"some column\"",
-        "%sqlplot pie --table spaces.csv --column \"some column\"",
+        '%sqlplot boxplot --table spaces.csv --column "some column"',
+        '%sqlplot histogram --table spaces.csv --column "some column"',
+        '%sqlplot bar --table spaces.csv --column "some column"',
+        '%sqlplot pie --table spaces.csv --column "some column"',
         pytest.param(
             "%sqlplot boxplot --table 'file with spaces.csv' --column x",
             marks=pytest.mark.xfail(
@@ -224,44 +224,50 @@ x
     )
     ip.run_cell("%sql duckdb://")
 
-@image_comparison(baseline_images=['bar_one_col'], extensions=['png'])
+
+@image_comparison(baseline_images=["bar_one_col"], extensions=["png"])
 def test_bar_one_col(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data.csv -c x")
     _cleanup_cm()
 
-@image_comparison(baseline_images=['bar_one_col_h'], extensions=['png'])
+
+@image_comparison(baseline_images=["bar_one_col_h"], extensions=["png"])
 def test_bar_one_col_h(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data.csv -c x -o h")
     _cleanup_cm()
 
-@image_comparison(baseline_images=['bar_one_col_num_h'], extensions=['png'])
+
+@image_comparison(baseline_images=["bar_one_col_num_h"], extensions=["png"])
 def test_bar_one_col_num_h(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data.csv -c x -o h -S")
     _cleanup_cm()
 
-@image_comparison(baseline_images=['bar_one_col_num_v'], extensions=['png'])
+
+@image_comparison(baseline_images=["bar_one_col_num_v"], extensions=["png"])
 def test_bar_one_col_num_v(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data.csv -c x -S")
     _cleanup_cm()
 
-@image_comparison(baseline_images=['bar_two_col'], extensions=['png'])
+
+@image_comparison(baseline_images=["bar_two_col"], extensions=["png"])
 def test_bar_two_col(load_data_two_col, ip):
     ip.run_cell("%sqlplot bar -t data_two.csv -c x y")
     _cleanup_cm()
 
-@image_comparison(baseline_images=['pie_one_col'], extensions=['png'])
+
+@image_comparison(baseline_images=["pie_one_col"], extensions=["png"])
 def test_pie_one_col(load_data_one_col, ip):
     ip.run_cell("%sqlplot pie -t data.csv -c x")
     _cleanup_cm()
 
 
-@image_comparison(baseline_images=['pie_one_col_num'], extensions=['png'])
+@image_comparison(baseline_images=["pie_one_col_num"], extensions=["png"])
 def test_pie_one_col_num(load_data_one_col, ip):
     ip.run_cell("%sqlplot pie -t data.csv -c x -S")
     _cleanup_cm()
 
 
-@image_comparison(baseline_images=['pie_two_col'], extensions=['png'])
+@image_comparison(baseline_images=["pie_two_col"], extensions=["png"])
 def test_pie_two_col(load_data_two_col, ip):
     ip.run_cell("%sqlplot pie -t data_two.csv -c x y")
     _cleanup_cm()
