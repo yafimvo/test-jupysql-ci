@@ -177,25 +177,18 @@ Shortcut: `%sqlplot bar`
 
 `-S`/`--show-numbers` Show numbers on top of the bar
 
-Barplot does not support NULL values, so let's remove them:
+Bar plot does not support NULL values, so we automatically remove them, when plotting.
 
 ```{code-cell} ipython3
-%%sql --save no_nulls --no-execute
-SELECT *
-FROM penguins.csv
-WHERE species IS NOT NULL
-```
-
-```{code-cell} ipython3
-%sqlplot bar --table no_nulls --column species --with no_nulls
+%sqlplot bar --table penguins.csv --column species --with no_nulls
 ```
 
 You can additionally pass two columns to bar plot i.e. `x` and `height` columns.
 
 ```{code-cell} ipython3
-%%sql --save add_col --no-execute --with no_nulls
+%%sql --save add_col --no-execute
 SELECT species, count(species) as cnt
-FROM no_nulls
+FROM penguins.csv
 group by species
 ```
 
@@ -212,7 +205,7 @@ You can also pass the orientation using the `orient` argument.
 You can also show the number on top of the bar using the `S`/`show-numbers` argument.
 
 ```{code-cell} ipython3
-%sqlplot bar --table no_nulls --column species --with no_nulls -S
+%sqlplot bar --table penguins.csv --column species -S
 ```
 
 ## `%sqlplot pie`
@@ -230,25 +223,18 @@ Shortcut: `%sqlplot pie`
 
 `-S`/`--show-numbers` Show the percentage on top of the pie
 
-Pie chart does not support NULL values, so let's remove them:
+Pie chart does not support NULL values, so we automatically remove them, when plotting the pie chart.
 
 ```{code-cell} ipython3
-%%sql --save no_nulls --no-execute
-SELECT *
-FROM penguins.csv
-WHERE species IS NOT NULL
-```
-
-```{code-cell} ipython3
-%sqlplot pie --table no_nulls --column species --with no_nulls
+%sqlplot pie --table penguins.csv --column species
 ```
 
 You can additionally pass two columns to bar plot i.e. `labels` and `x` columns.
 
 ```{code-cell} ipython3
-%%sql --save add_col --no-execute --with no_nulls
+%%sql --save add_col --no-execute
 SELECT species, count(species) as cnt
-FROM no_nulls
+FROM penguins.csv
 group by species
 ```
 
@@ -261,5 +247,5 @@ Here, `species` is the `labels` column and `cnt` is the `x` column.
 You can also show the percentage on top of the pie using the `S`/`show-numbers` argument.
 
 ```{code-cell} ipython3
-%sqlplot pie --table no_nulls --column species --with no_nulls -S
+%sqlplot pie --table penguins.csv --column species -S
 ```

@@ -629,7 +629,9 @@ def _bar(table, column, with_=None, conn=None):
         template_ = """
             select "{{x_}}" as x,
             "{{height_}}" as height
-            from "{{table}}";
+            from "{{table}}"
+            where "{{x_}}" is not null
+            and "{{height_}}" is not null;
             """
 
         xlabel = x_
@@ -646,6 +648,7 @@ def _bar(table, column, with_=None, conn=None):
                 select "{{column}}" as x,
                 count("{{column}}") as height
                 from "{{table}}"
+                where "{{column}}" is not null
                 group by "{{column}}";
                 """
 
@@ -809,7 +812,9 @@ def _pie(table, column, with_=None, conn=None):
         template_ = """
                 select "{{labels_}}" as labels,
                 "{{size_}}" as size
-                from "{{table}}";
+                from "{{table}}"
+                where "{{labels_}}" is not null
+                and "{{size_}}" is not null;
                 """
         if use_backticks:
             template_ = template_.replace('"', "`")
@@ -822,6 +827,7 @@ def _pie(table, column, with_=None, conn=None):
                 select "{{column}}" as x,
                 count("{{column}}") as height
                 from "{{table}}"
+                where "{{column}}" is not null
                 group by "{{column}}";
                 """
         if use_backticks:
