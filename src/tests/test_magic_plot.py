@@ -206,8 +206,8 @@ x, y
 2, 2
 5,7
             """
-            )
-        
+        )
+
     ip.run_cell("%sql duckdb://")
 
 
