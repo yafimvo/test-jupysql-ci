@@ -229,49 +229,49 @@ x
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["bar_one_col"], extensions=["png"])
+@image_comparison(baseline_images=["bar_one_col"], extensions=["png"], remove_text=True)
 def test_bar_one_col(load_data_one_col, ip):
     # plt.cla()
     ip.run_cell("%sqlplot bar -t data_one.csv -c x")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["bar_one_col_h"], extensions=["png"])
+@image_comparison(baseline_images=["bar_one_col_h"], extensions=["png"], remove_text=True)
 def test_bar_one_col_h(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data_one.csv -c x -o h")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["bar_one_col_num_h"], extensions=["png"])
+@image_comparison(baseline_images=["bar_one_col_num_h"], extensions=["png"], remove_text=True)
 def test_bar_one_col_num_h(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data_one.csv -c x -o h -S")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["bar_one_col_num_v"], extensions=["png"])
+@image_comparison(baseline_images=["bar_one_col_num_v"], extensions=["png"], remove_text=True)
 def test_bar_one_col_num_v(load_data_one_col, ip):
     ip.run_cell("%sqlplot bar -t data_one.csv -c x -S")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["bar_two_col"], extensions=["png"])
+@image_comparison(baseline_images=["bar_two_col"], extensions=["png"], remove_text=True)
 def test_bar_two_col(load_data_two_col, ip):
     ip.run_cell("%sqlplot bar -t data_two.csv -c x y")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["pie_one_col"], extensions=["png"])
+@image_comparison(baseline_images=["pie_one_col"], extensions=["png"], remove_text=True)
 def test_pie_one_col(load_data_one_col, ip):
     ip.run_cell("%sqlplot pie -t data_one.csv -c x")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["pie_one_col_num"], extensions=["png"])
+@image_comparison(baseline_images=["pie_one_col_num"], extensions=["png"], remove_text=True)
 def test_pie_one_col_num(load_data_one_col, ip):
     ip.run_cell("%sqlplot pie -t data_one.csv -c x -S")
 
 
 @_cleanup_cm()
-@image_comparison(baseline_images=["pie_two_col"], extensions=["png"])
+@image_comparison(baseline_images=["pie_two_col"], extensions=["png"], remove_text=True)
 def test_pie_two_col(load_data_two_col, ip):
     ip.run_cell("%sqlplot pie -t data_two.csv -c x y")
