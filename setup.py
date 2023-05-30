@@ -28,6 +28,7 @@ install_requires = [
     "sqlglot>=11.3.7",
     "ploomber-core>=0.2.7",
     'importlib-metadata;python_version<"3.8"',
+    "psutil",
 ]
 
 DEV = [
@@ -39,7 +40,7 @@ DEV = [
     "pkgmt",
     "twine",
     # tests
-    "duckdb==0.7.1",
+    "duckdb<0.8.0",
     "duckdb-engine",
     "pyodbc",
     # sql.plot module tests
@@ -47,6 +48,8 @@ DEV = [
     "black",
     # for %%sql --interact
     "ipywidgets",
+    # for running tests for %sqlcmd explore --table
+    "js2py",
 ]
 
 # dependencies for running integration tests
@@ -58,6 +61,7 @@ INTEGRATION = [
     "pgspecial==2.0.1",
     "pyodbc",
     "snowflake-sqlalchemy",
+    "oracledb",
 ]
 
 setup(

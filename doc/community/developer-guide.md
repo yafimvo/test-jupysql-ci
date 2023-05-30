@@ -61,6 +61,79 @@ The internal implementation of `sql.exceptions` is a workaround due to some IPyt
 
 +++
 
+### Handling common errors
+
+Currently, these common errors are handled by providing more meaningful error messages:
+
+* Syntax error in SQL query - The SQL query is parsed using `sqlglot` and possible syntax issues or query suggestions are provided to the user. This raises a `UsageError` with the message.
+* Missing password when connecting to PostgreSQL - Displays guide on DB connections
+* Invalid connection strings when connecting to DuckDB.
+
++++
+
+## Managing Connections
+
+In our codebase, we manage connections to databases with a `Connection` object, this is required for the `%%sql magic` to work. Internally, this connection object has a sqlalchemy connection.
+
+### Working with connections
+
+`Connection` should be exclusively used to manage database connections on the user's behalf and to obtain the current SQLAlchemy connection. We can access the current SQLAlchemy connection using `current.session`.
+
+```{code-cell} ipython3
+:tags: [remove-output]
+
+%load_ext sql
+%sql sqlite://
+```
+
+```{code-cell} ipython3
+from sql.connection import Connection
+
+conn = Connection.current.session
+conn
+```
+ 
+Functions that expect a `conn` (sometimes named `con`) input variable should only use SQLAlchemy connections.
+
+```python
+def histogram(payload, table, column, bins, with_=None, conn=None):
+    pass
+```
+
+### Tests
+
+When creating data for tests, we should use `sqlalchemy.create_engine` and avoid using native driver functions (e.g. `sqlite3.connect` or `duckdb.connect`) to ensure consistency.
+
+```{code-cell} ipython3
+from sqlalchemy import create_engine
+from sql.connection import Connection
+
+conn = Connection(engine=create_engine("sqlite://"))
+
+conn.execute("CREATE TABLE some_table (name, age)")
+```
+
+### Non SQLAlchemy supported engines
+
+When working with engines that are not supported by SQLAlchemy, e.g. `QuestDB`, we won't be able to use `sqlalchemy.create_engine`.
+Instead, we should initiate an engine using the native method and use the `CustomConnection` object.
+
+```python
+import psycopg as pg
+from sql.connection import CustomConnection
+
+engine = pg.connect("dbname='qdb' user='admin' host='127.0.0.1' port='8812' password='quest'")
+conn = CustomConnection(engine)
+
+plot.histogram("my_table", "column_name", bins=50, conn=conn)
+```
+
+For a full example on how to use JupySQL with a non SQLAlchemy supported engine please see [QuestDB](./../integrations/questdb).
+
+```{note}
+Please be advised that there may be some features/functionalities that won't be fully compatible with JupySQL when using `CustomConnection`.
+```
+
 ## Unit testing
 
 ### Running tests
@@ -214,7 +287,7 @@ pkgmt setup
 # activate environment
 conda activate jupysql
 
-# install depdencies
+# install dependencies
 pip install -e '.[integration]'
 ```
 
@@ -227,6 +300,14 @@ the required Docker images):
 
 ```sh
 pytest src/tests/integration
+```
+
+```{important}
+If you're using **Apple M chips**, the docker container on Oracle Database might fail since it's only supporting to x86_64 CPU.
+
+You will need to install [colima](https://github.com/abiosoft/colima) then run `colima start --cpu 4 --memory 4 --disk 30 --arch x86_64` before running the integration testing. [See more](https://hub.docker.com/r/gvenzl/oracle-xe)
+
+Send us a [message on Slack](https://ploomber.io/community) if any issue happens.
 ```
 
 ```{important}
@@ -244,6 +325,7 @@ pytest src/tests/integration/test_generic_db_operations.py::test_profile_query
 We run integration tests against cloud databases like Snowflake, which requires using pre-registered accounts to evaluate their behavior. To initiate these tests, please create a branch in our [ploomber/jupyter repository](https://github.com/ploomber/jupysql).
 
 Please note that if you submit a pull request from a forked repository, the integration testing phase will be skipped because the pre-registered accounts won't be accessible.
+
 ## General SQL Clause for Multiple Database Dialects
 
 ### Context
@@ -288,9 +370,9 @@ print("Transpiled result: ")
 conn._transpile_query(general_sql)
 ```
 
-### Approach 2 - Provide SQL Clause based on specfic database 
+### Approach 2 - Provide SQL Clause based on specific database 
 
-Sometimes the SQL Clause might be complex, we can also write the SQL Clause based on one specfic database and transpile it.
+Sometimes the SQL Clause might be complex, we can also write the SQL Clause based on one specific database and transpile it.
 
 For example, the `TO_TIMESTAMP` keyword is only defined in duckdb, but we want to also apply this SQL clause to other database.
 

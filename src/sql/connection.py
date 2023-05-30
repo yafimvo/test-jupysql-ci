@@ -3,7 +3,7 @@ from difflib import get_close_matches
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import NoSuchModuleError
+from sqlalchemy.exc import NoSuchModuleError, OperationalError
 from IPython.core.error import UsageError
 import difflib
 import sqlglot
@@ -11,10 +11,11 @@ import sqlglot
 from sql.store import store
 from sql.telemetry import telemetry
 from sql import exceptions
+from sql.error_message import detail
+from ploomber_core.exceptions import modify_exceptions
 
-PLOOMBER_SUPPORT_LINK_STR = (
-    "For technical support: https://ploomber.io/community"
-    "\nDocumentation: https://jupysql.ploomber.io/en/latest/connecting.html"
+PLOOMBER_DOCS_LINK_STR = (
+    "Documentation: https://jupysql.ploomber.io/en/latest/connecting.html"
 )
 IS_SQLALCHEMY_ONE = int(sqlalchemy.__version__.split(".")[0]) == 1
 
@@ -49,6 +50,19 @@ MISSING_PACKAGE_LIST_EXCEPT_MATCHERS = {
 }
 
 DIALECT_NAME_SQLALCHEMY_TO_SQLGLOT_MAPPING = {"postgresql": "postgres", "mssql": "tsql"}
+
+# All the DBs and their respective documentation links
+DB_DOCS_LINKS = {
+    "duckdb": "https://jupysql.ploomber.io/en/latest/integrations/duckdb.html",
+    "mysql": "https://jupysql.ploomber.io/en/latest/integrations/mysql.html",
+    "mssql": "https://jupysql.ploomber.io/en/latest/integrations/mssql.html",
+    "mariadb": "https://jupysql.ploomber.io/en/latest/integrations/mariadb.html",
+    "clickhouse": "https://jupysql.ploomber.io/en/latest/integrations/clickhouse.html",
+    "postgresql": (
+        "https://jupysql.ploomber.io/en/latest/integrations/postgres-connect.html"
+    ),
+    "questdb": "https://jupysql.ploomber.io/en/latest/integrations/questdb.html",
+}
 
 
 def extract_module_name_from_ModuleNotFoundError(e):
@@ -109,6 +123,29 @@ def rough_dict_get(dct, sought, default=None):
     return default
 
 
+def is_pep249_compliant(conn):
+    """
+    Checks if given connection object complies with PEP 249
+    """
+    pep249_methods = [
+        "close",
+        "commit",
+        # "rollback",
+        # "cursor",
+        # PEP 249 doesn't require the connection object to have
+        # a cursor method strictly
+        # ref: https://peps.python.org/pep-0249/#id52
+    ]
+
+    for method_name in pep249_methods:
+        # Checking whether the connection object has the method
+        # and if it is callable
+        if not hasattr(conn, method_name) or not callable(getattr(conn, method_name)):
+            return False
+
+    return True
+
+
 class Connection:
     """Manages connections to databases
 
@@ -129,19 +166,19 @@ class Connection:
         self.name = self.assign_name(engine)
         self.dialect = self.url.get_dialect()
         self.engine = engine
-        self.session = engine.connect()
 
         if IS_SQLALCHEMY_ONE:
             self.metadata = sqlalchemy.MetaData(bind=engine)
 
-        self.connections[
-            alias
-            or (
-                repr(sqlalchemy.MetaData(bind=engine).bind.url)
-                if IS_SQLALCHEMY_ONE
-                else repr(engine.url)
-            )
-        ] = self
+        url = (
+            repr(sqlalchemy.MetaData(bind=engine).bind.url)
+            if IS_SQLALCHEMY_ONE
+            else repr(engine.url)
+        )
+
+        self.session = self._create_session(engine, url)
+
+        self.connections[alias or url] = self
 
         self.connect_args = None
         self.alias = alias
@@ -158,26 +195,53 @@ class Connection:
         return "\n\n".join(options)
 
     @classmethod
+    @modify_exceptions
+    def _create_session(cls, engine, connect_str):
+        try:
+            session = engine.connect()
+            return session
+        except OperationalError as e:
+            detailed_msg = detail(e)
+            if detailed_msg is not None:
+                raise exceptions.UsageError(detailed_msg)
+            else:
+                print(e)
+        except Exception as e:
+            raise cls._error_invalid_connection_info(e, connect_str) from e
+
+    @classmethod
     def _suggest_fix(cls, env_var, connect_str=None):
         """
         Returns an error message that we can display to the user
         to tell them how to pass the connection string
         """
         DEFAULT_PREFIX = "\n\n"
+        prefix = ""
 
         if connect_str:
             matches = get_close_matches(connect_str, list(cls.connections), n=1)
+            matches_db = get_close_matches(
+                connect_str.lower(), list(DB_DOCS_LINKS.keys()), cutoff=0.3, n=1
+            )
 
             if matches:
-                prefix = (
+                prefix = prefix + (
                     "\n\nPerhaps you meant to use the existing "
-                    f"connection: %sql {matches[0]!r}?\n\n"
+                    f"connection: %sql {matches[0]!r}?"
                 )
 
-            else:
+            if matches_db:
+                prefix = prefix + (
+                    f"\n\nPerhaps you meant to use the {matches_db[0]!r} db \n"
+                    f"To find more information regarding connection: "
+                    f"{DB_DOCS_LINKS[matches_db[0]]}\n\n"
+                )
+
+            if not matches and not matches_db:
                 prefix = DEFAULT_PREFIX
         else:
             matches = None
+            matches_db = None
             prefix = DEFAULT_PREFIX
 
         connection_string = (
@@ -203,21 +267,25 @@ class Connection:
         if len(options) >= 3:
             options.insert(-1, "OR")
 
-        options.append(PLOOMBER_SUPPORT_LINK_STR)
+        options.append(PLOOMBER_DOCS_LINK_STR)
 
         return "\n\n".join(options)
 
     @classmethod
     def _error_no_connection(cls):
         """Error when there isn't any connection"""
-        return UsageError("No active connection." + cls._suggest_fix(env_var=True))
+        err = UsageError("No active connection." + cls._suggest_fix(env_var=True))
+        err.modify_exception = True
+        return err
 
     @classmethod
     def _error_invalid_connection_info(cls, e, connect_str):
-        return UsageError(
+        err = UsageError(
             "An error happened while creating the connection: "
             f"{e}.{cls._suggest_fix(env_var=False, connect_str=connect_str)}"
         )
+        err.modify_exception = True
+        return err
 
     @classmethod
     def from_connect_str(
@@ -245,7 +313,7 @@ class Connection:
                     [
                         str(e),
                         suggestion_str,
-                        PLOOMBER_SUPPORT_LINK_STR,
+                        PLOOMBER_DOCS_LINK_STR,
                     ]
                 )
             ) from e
@@ -373,14 +441,9 @@ class Connection:
         if isinstance(conn, (CustomConnection, CustomSession)):
             is_custom_connection_ = True
         else:
-            # TODO: Better check when user passes a custom
-            # connection
-            if (
-                isinstance(
-                    conn, (sqlalchemy.engine.base.Connection, Connection, str, bool)
-                )
-                or conn.__class__.__name__ == "DataFrame"
-            ):
+            if isinstance(
+                conn, (sqlalchemy.engine.base.Connection, Connection)
+            ) or not (is_pep249_compliant(conn)):
                 is_custom_connection_ = False
             else:
                 is_custom_connection_ = True

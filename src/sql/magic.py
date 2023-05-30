@@ -29,8 +29,9 @@ from sql.magic_cmd import SqlCmdMagic
 from sql._patch import patch_ipython_usage_error
 from ploomber_core.dependencies import check_installed
 
+from sql.error_message import detail
 from traitlets.config.configurable import Configurable
-from traitlets import Bool, Int, Unicode, Dict, observe
+from traitlets import Bool, Int, TraitError, Unicode, Dict, observe, validate
 
 try:
     from pandas.core.frame import DataFrame, Series
@@ -39,6 +40,7 @@ except ModuleNotFoundError:
     Series = None
 
 from sql.telemetry import telemetry
+
 
 SUPPORT_INTERACTIVE_WIDGETS = ["Checkbox", "Text", "IntSlider", ""]
 
@@ -94,7 +96,7 @@ class SqlMagic(Magics, Configurable):
         help="Don't display the full traceback on SQL Programming Error",
     )
     displaylimit = Int(
-        None,
+        sql.run.DEFAULT_DISPLAYLIMIT_VALUE,
         config=True,
         allow_none=True,
         help=(
@@ -144,6 +146,26 @@ class SqlMagic(Magics, Configurable):
         # Add ourself to the list of module configurable via %config
         self.shell.configurables.append(self)
 
+    # To verify displaylimit is valid positive integer
+    # If:
+    #   None -> We treat it as 0 (no limit)
+    #   Positive Integer -> Pass
+    #   Negative Integer -> raise Error
+    @validate("displaylimit")
+    def _valid_displaylimit(self, proposal):
+        if proposal["value"] is None:
+            print("displaylimit: Value None will be treated as 0 (no limit)")
+            return 0
+        try:
+            value = int(proposal["value"])
+            if value < 0:
+                raise TraitError(
+                    "{}: displaylimit cannot be a negative integer".format(value)
+                )
+            return value
+        except ValueError:
+            raise TraitError("{}: displaylimit is not an integer".format(value))
+
     @observe("autopandas", "autopolars")
     def _mutex_autopandas_autopolars(self, change):
         # When enabling autopandas or autopolars, automatically disable the
@@ -180,6 +202,12 @@ class SqlMagic(Magics, Configurable):
         "--persist",
         action="store_true",
         help="create a table name in the database from the named DataFrame",
+    )
+    @argument(
+        "-P",
+        "--persist-replace",
+        action="store_true",
+        help="replace the DataFrame if it exists, otherwise perform --persist",
     )
     @argument(
         "-n",
@@ -261,6 +289,7 @@ class SqlMagic(Magics, Configurable):
         )
 
     @telemetry.log_call("execute", payload=True)
+    @modify_exceptions
     def _execute(self, payload, line, cell, local_ns, is_interactive_mode=False):
         def interactive_execute_wrapper(**kwargs):
             for key, value in kwargs.items():
@@ -345,11 +374,34 @@ class SqlMagic(Magics, Configurable):
             alias=args.alias,
         )
         payload["connection_info"] = conn._get_curr_sqlalchemy_connection_info()
-        if args.persist:
+        if args.persist_replace and args.append:
+            raise exceptions.UsageError(
+                """You cannot simultaneously persist and append data to a dataframe;
+                  please choose to utilize either one or the other."""
+            )
+        if args.persist and args.persist_replace:
+            warnings.warn("Please use either --persist or --persist-replace")
+            return self._persist_dataframe(
+                command.sql,
+                conn,
+                user_ns,
+                append=False,
+                index=not args.no_index,
+                replace=True,
+            )
+        elif args.persist:
             return self._persist_dataframe(
                 command.sql, conn, user_ns, append=False, index=not args.no_index
             )
-
+        elif args.persist_replace:
+            return self._persist_dataframe(
+                command.sql,
+                conn,
+                user_ns,
+                append=False,
+                index=not args.no_index,
+                replace=True,
+            )
         if args.append:
             return self._persist_dataframe(
                 command.sql, conn, user_ns, append=True, index=not args.no_index
@@ -401,6 +453,8 @@ class SqlMagic(Magics, Configurable):
             else:
                 if command.result_var:
                     self.shell.user_ns.update({command.result_var: result})
+                    if command.return_result_var:
+                        return result
                     return None
 
                 # Return results into the default ipython _ variable
@@ -409,16 +463,25 @@ class SqlMagic(Magics, Configurable):
         # JA: added DatabaseError for MySQL
         except (ProgrammingError, OperationalError, DatabaseError) as e:
             # Sqlite apparently return all errors as OperationalError :/
-
+            detailed_msg = detail(e, command.sql)
             if self.short_errors:
-                print(e)
+                if detailed_msg is not None:
+                    err = exceptions.UsageError(detailed_msg)
+                    raise err
+                else:
+                    print(e)
             else:
-                raise
+                if detailed_msg is not None:
+                    print(detailed_msg)
+                e.modify_exception = True
+                raise e
 
     legal_sql_identifier = re.compile(r"^[A-Za-z0-9#_$]+")
 
     @modify_exceptions
-    def _persist_dataframe(self, raw, conn, user_ns, append=False, index=True):
+    def _persist_dataframe(
+        self, raw, conn, user_ns, append=False, index=True, replace=False
+    ):
         """Implements PERSIST, which writes a DataFrame to the RDBMS"""
         if not DataFrame:
             raise exceptions.MissingPackageError(
@@ -457,14 +520,22 @@ class SqlMagic(Magics, Configurable):
         table_name = frame_name.lower()
         table_name = self.legal_sql_identifier.search(table_name).group(0)
 
-        if_exists = "append" if append else "fail"
+        if replace:
+            if_exists = "replace"
+        elif append:
+            if_exists = "append"
+        else:
+            if_exists = "fail"
 
         try:
             frame.to_sql(
                 table_name, conn.session.engine, if_exists=if_exists, index=index
             )
-        except ValueError as e:
-            raise exceptions.ValueError(e) from e
+        except ValueError:
+            raise exceptions.ValueError(
+                f"""Table {table_name!r} already exists. Consider using \
+--persist-replace to drop the table before persisting the data frame"""
+            )
 
         return "Persisted %s" % table_name
 
