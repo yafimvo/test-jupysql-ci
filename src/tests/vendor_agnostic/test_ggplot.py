@@ -6,14 +6,14 @@ from urllib.request import urlretrieve
 
 
 @pytest.fixture
-def short_trips_data(ip, yellow_trip_data):
-    ip.run_cell(
+def short_trips_data(custom_ip, yellow_trip_data):
+    custom_ip.run_cell(
         """
         %sql duckdb://
         """
     )
 
-    ip.run_cell(
+    custom_ip.run_cell(
         f"""
         %%sql --save short_trips --no-execute
         select * from "{yellow_trip_data}"
@@ -23,8 +23,8 @@ def short_trips_data(ip, yellow_trip_data):
 
 
 @pytest.fixture
-def yellow_trip_data(ip, tmpdir):
-    ip.run_cell(
+def yellow_trip_data(custom_ip, tmpdir):
+    custom_ip.run_cell(
         """
     %sql duckdb://
     """
@@ -43,8 +43,8 @@ def yellow_trip_data(ip, tmpdir):
 
 
 @pytest.fixture
-def diamonds_data(ip, tmpdir):
-    ip.run_cell(
+def diamonds_data(custom_ip, tmpdir):
+    custom_ip.run_cell(
         """
         %sql duckdb://
         """
@@ -75,14 +75,14 @@ def penguins_data(tmpdir):
 
 
 @pytest.fixture
-def penguins_no_nulls(ip, penguins_data):
-    ip.run_cell(
+def penguins_no_nulls(custom_ip, penguins_data):
+    custom_ip.run_cell(
         """
         %sql duckdb://
         """
     )
 
-    ip.run_cell(
+    custom_ip.run_cell(
         f"""
 %%sql --save no_nulls --no-execute
 SELECT *
